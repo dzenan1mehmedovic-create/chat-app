@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { connectDB, db } from "./lib/db.js";
+import authRoutes from "./routes/auth.route.js";
 
 dotenv.config();
 
@@ -36,6 +37,8 @@ app.get("/test-db", async (req, res) => {
     });
   }
 });
+
+app.use("/api/auth", authRoutes);
 
 const PORT = process.env.PORT || 5001;
 
