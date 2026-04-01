@@ -1,12 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import Sidebar from "../components/Sidebar";
 import ChatContainer from "../components/ChatContainer";
+import ProfileModal from "../components/ProfileModal";
+
+const BACKEND_URL = "http://localhost:5001";
 
 const HomePage = () => {
   const { selectedUser, getUsers } = useChatStore();
   const { logout, authUser } = useAuthStore();
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   useEffect(() => {
     getUsers();
@@ -72,17 +76,71 @@ const HomePage = () => {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "14px",
+                gap: "12px",
               }}
             >
-              <div
+              <button
+                onClick={() => setShowProfileModal(true)}
                 style={{
-                  color: "#f3cfab",
-                  fontWeight: "600",
-                  fontSize: "15px",
+                  border: "1px solid rgba(196, 133, 82, 0.35)",
+                  background: "rgba(39, 13, 6, 0.9)",
+                  color: "#fff",
+                  borderRadius: "14px",
+                  padding: "10px 16px",
+                  cursor: "pointer",
+                  fontWeight: "700",
                 }}
               >
-                {authUser?.full_name}
+                Profile
+              </button>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                {authUser?.profile_pic ? (
+                  <img
+                    src={`${BACKEND_URL}${authUser.profile_pic}`}
+                    alt="me"
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "2px solid #b57a4d",
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      background: "#b57a4d",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#fff",
+                      fontWeight: "800",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {authUser?.full_name?.charAt(0)}
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    color: "#f3cfab",
+                    fontWeight: "600",
+                    fontSize: "15px",
+                  }}
+                >
+                  {authUser?.full_name}
+                </div>
               </div>
 
               <button
@@ -165,6 +223,10 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+
+      {showProfileModal && (
+        <ProfileModal onClose={() => setShowProfileModal(false)} />
+      )}
     </div>
   );
 };

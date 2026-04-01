@@ -2,24 +2,19 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-const uploadPath = "uploads/messages";
+const ensureDir = (dirPath) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
 
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath, { recursive: true });
-}
+const messagesPath = "uploads/messages";
+const profilesPath = "uploads/profiles";
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const ext = path.extname(file.originalname);
-    cb(null, `message-${uniqueSuffix}${ext}`);
-  },
-});
+ensureDir(messagesPath);
+ensureDir(profilesPath);
 
-const fileFilter = (req, file, cb) => {
+const imageFileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image/")) {
     cb(null, true);
   } else {
@@ -27,9 +22,29 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+const createStorage = (folder, prefix) =>
+  multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, folder);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+      const ext = path.extname(file.originalname);
+      cb(null, `${prefix}-${uniqueSuffix}${ext}`);
+    },
+  });
+
 export const uploadMessageImage = multer({
-  storage,
-  fileFilter,
+  storage: createStorage(messagesPath, "message"),
+  fileFilter: imageFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+});
+
+export const uploadProfileImage = multer({
+  storage: createStorage(profilesPath, "profile"),
+  fileFilter: imageFileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024,
   },

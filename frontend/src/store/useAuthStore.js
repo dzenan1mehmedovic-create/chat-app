@@ -7,6 +7,7 @@ export const useAuthStore = create((set) => ({
   isSigningUp: false,
   isLoggingIn: false,
   isCheckingAuth: true,
+  isUpdatingProfile: false,
 
   checkAuth: async () => {
     try {
@@ -64,12 +65,38 @@ export const useAuthStore = create((set) => ({
   logout: async () => {
     try {
       await axiosInstance.post("/auth/logout");
-
       useSocketStore.getState().disconnectSocket();
-
       set({ authUser: null });
     } catch (error) {
       console.log(error);
+    }
+  },
+
+  updateProfile: async ({ full_name, profile_pic }) => {
+    set({ isUpdatingProfile: true });
+
+    try {
+      const formData = new FormData();
+
+      if (full_name) {
+        formData.append("full_name", full_name);
+      }
+
+      if (profile_pic) {
+        formData.append("profile_pic", profile_pic);
+      }
+
+      const res = await axiosInstance.put("/auth/update-profile", formData);
+
+      set({ authUser: res.data });
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Greška pri update profila",
+      };
+    } finally {
+      set({ isUpdatingProfile: false });
     }
   },
 }));

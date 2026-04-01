@@ -3,6 +3,8 @@ import { useChatStore } from "../store/useChatStore";
 import { useSocketStore } from "../store/useSocketStore";
 import { useAuthStore } from "../store/useAuthStore";
 
+const BACKEND_URL = "http://localhost:5001";
+
 const Sidebar = () => {
   const { users, setSelectedUser, selectedUser, messages } = useChatStore();
   const { onlineUsers } = useSocketStore();
@@ -24,7 +26,8 @@ const Sidebar = () => {
 
     const lastMessage = chatMessages[chatMessages.length - 1];
 
-    if (!lastMessage?.text?.trim()) return "Poslana poruka";
+    if (lastMessage.image && !lastMessage.text) return "📷 Slika";
+    if (lastMessage.image && lastMessage.text) return `📷 ${lastMessage.text}`;
 
     return lastMessage.text.length > 26
       ? `${lastMessage.text.slice(0, 26)}...`
@@ -175,23 +178,37 @@ const Sidebar = () => {
                     minWidth: "52px",
                   }}
                 >
-                  <div
-                    style={{
-                      width: "52px",
-                      height: "52px",
-                      borderRadius: "50%",
-                      background: "#b57a4d",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#fff",
-                      fontWeight: "800",
-                      fontSize: "20px",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {user.full_name?.charAt(0)}
-                  </div>
+                  {user.profile_pic ? (
+                    <img
+                      src={`${BACKEND_URL}${user.profile_pic}`}
+                      alt={user.full_name}
+                      style={{
+                        width: "52px",
+                        height: "52px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        border: "2px solid #b57a4d",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: "52px",
+                        height: "52px",
+                        borderRadius: "50%",
+                        background: "#b57a4d",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#fff",
+                        fontWeight: "800",
+                        fontSize: "20px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {user.full_name?.charAt(0)}
+                    </div>
+                  )}
 
                   <div
                     style={{

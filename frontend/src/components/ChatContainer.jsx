@@ -83,23 +83,37 @@ const ChatContainer = () => {
               height: "50px",
             }}
           >
-            <div
-              style={{
-                width: "50px",
-                height: "50px",
-                borderRadius: "50%",
-                background: "#b57a4d",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#fff",
-                fontWeight: "800",
-                fontSize: "20px",
-                textTransform: "uppercase",
-              }}
-            >
-              {selectedUser?.full_name?.charAt(0)}
-            </div>
+            {selectedUser?.profile_pic ? (
+              <img
+                src={`${BACKEND_URL}${selectedUser.profile_pic}`}
+                alt={selectedUser.full_name}
+                style={{
+                  width: "50px",
+                  height: "50px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  border: "2px solid #b57a4d",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "50px",
+                  height: "50px",
+                  borderRadius: "50%",
+                  background: "#b57a4d",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                  fontWeight: "800",
+                  fontSize: "20px",
+                  textTransform: "uppercase",
+                }}
+              >
+                {selectedUser?.full_name?.charAt(0)}
+              </div>
+            )}
 
             <div
               style={{

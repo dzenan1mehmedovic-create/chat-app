@@ -32,6 +32,7 @@ export const register = async (req, res) => {
       id: result.insertId,
       full_name,
       email,
+      profile_pic: "",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -92,5 +93,49 @@ export const checkAuth = async (req, res) => {
     res.status(200).json(users[0]);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { full_name } = req.body;
+
+    const [currentUsers] = await db.query(
+      "SELECT id, full_name, email, profile_pic FROM users WHERE id = ?",
+      [userId],
+    );
+
+    if (currentUsers.length === 0) {
+      return res.status(404).json({ message: "Korisnik nije pronađen" });
+    }
+
+    const currentUser = currentUsers[0];
+
+    const updatedFullName =
+      full_name && full_name.trim() ? full_name.trim() : currentUser.full_name;
+
+    let updatedProfilePic = currentUser.profile_pic || "";
+
+    if (req.file) {
+      updatedProfilePic = `/uploads/profiles/${req.file.filename}`;
+    }
+
+    await db.query(
+      `UPDATE users
+       SET full_name = ?, profile_pic = ?
+       WHERE id = ?`,
+      [updatedFullName, updatedProfilePic, userId],
+    );
+
+    const [updatedUsers] = await db.query(
+      "SELECT id, full_name, email, profile_pic FROM users WHERE id = ?",
+      [userId],
+    );
+
+    res.status(200).json(updatedUsers[0]);
+  } catch (error) {
+    console.log("Greška u updateProfile:", error.message);
+    res.status(500).json({ message: "Greška na serveru" });
   }
 };
