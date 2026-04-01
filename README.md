@@ -1,23 +1,23 @@
-# 💬 Chatty - Real-time Chat Application
+# Chatty - Real-time Chat Application
 
 Chatty je full-stack real-time chat aplikacija sa modernim UI/UX dizajnom i naprednim funkcionalnostima.
 
-## 🚀 Features
+## Features
 
-- 🔐 Autentifikacija (Login / Register)
-- 💬 Real-time chat (Socket.io)
-- 📷 Slanje slika u chatu
-- ✍️ Typing indicator (kada korisnik piše)
-- ✅ Seen / Sent status poruka
-- 🔔 Notifikacije za nove poruke (toast + sound)
-- 📬 Unread messages badge
-- 🎨 Theme switcher (više tema)
-- 👤 Profil korisnika (ime + slika)
-- 🟢 Online / Offline status
+- Autentifikacija (Login / Register)
+- Real-time chat (Socket.io)
+- Slanje slika u chatu
+- Typing indicator (kada korisnik piše)
+- Seen / Sent status poruka
+- Notifikacije za nove poruke (toast + sound)
+- Unread messages badge
+- Theme switcher (više tema)
+- Profil korisnika (ime + slika)
+- Online / Offline status
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 
@@ -35,11 +35,27 @@ Chatty je full-stack real-time chat aplikacija sa modernim UI/UX dizajnom i napr
 
 ---
 
-## ⚙️ Instalacija
+### Backend setup
 
-### 1. Kloniranje projekta
+- cd backend
+- npm install
+- npm run dev
 
-```bash
-git clone https://github.com/YOUR_USERNAME/chatty.git
-cd chatty
-```
+### Frontend setup
+
+- cd frontend
+- npm install
+- npm run dev
+
+### .env
+
+PORT=5001
+JWT_SECRET=
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=chat_app
+
+### Author
+
+- Dzenan Mehmedovic
