@@ -1,64 +1,49 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useSocketStore } from "../store/useSocketStore";
-import { useAuthStore } from "../store/useAuthStore";
 
 const BACKEND_URL = "http://localhost:5001";
 
 const Sidebar = () => {
-  const { users, setSelectedUser, selectedUser, messages } = useChatStore();
+  const { users, setSelectedUser, selectedUser, unreadCounts } = useChatStore();
   const { onlineUsers } = useSocketStore();
-  const { authUser } = useAuthStore();
 
   const [search, setSearch] = useState("");
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
-  const getLastMessagePreview = (userId) => {
-    const chatMessages = messages.filter(
-      (msg) =>
-        (Number(msg.sender_id) === Number(authUser?.id) &&
-          Number(msg.receiver_id) === Number(userId)) ||
-        (Number(msg.sender_id) === Number(userId) &&
-          Number(msg.receiver_id) === Number(authUser?.id)),
-    );
-
-    if (!chatMessages.length) return "Klikni za otvaranje chata";
-
-    const lastMessage = chatMessages[chatMessages.length - 1];
-
-    if (lastMessage.image && !lastMessage.text) return "📷 Slika";
-    if (lastMessage.image && lastMessage.text) return `📷 ${lastMessage.text}`;
-
-    return lastMessage.text.length > 26
-      ? `${lastMessage.text.slice(0, 26)}...`
-      : lastMessage.text;
+  const getUnreadCount = (userId) => {
+    return unreadCounts?.[userId] || 0;
   };
 
-  const filteredUsers = useMemo(() => {
-    let result = [...users];
+  let filteredUsers = [...users];
 
-    if (search.trim()) {
-      result = result.filter((user) =>
-        user.full_name.toLowerCase().includes(search.toLowerCase()),
-      );
-    }
+  if (search.trim()) {
+    filteredUsers = filteredUsers.filter((user) =>
+      user.full_name.toLowerCase().includes(search.toLowerCase())
+    );
+  }
 
-    if (showOnlineOnly) {
-      result = result.filter((user) => onlineUsers.includes(String(user.id)));
-    }
+  if (showOnlineOnly) {
+    filteredUsers = filteredUsers.filter((user) =>
+      onlineUsers.includes(String(user.id))
+    );
+  }
 
-    result.sort((a, b) => {
-      const aOnline = onlineUsers.includes(String(a.id));
-      const bOnline = onlineUsers.includes(String(b.id));
+  filteredUsers.sort((a, b) => {
+    const aUnread = getUnreadCount(a.id);
+    const bUnread = getUnreadCount(b.id);
 
-      if (aOnline && !bOnline) return -1;
-      if (!aOnline && bOnline) return 1;
+    if (aUnread > 0 && bUnread === 0) return -1;
+    if (aUnread === 0 && bUnread > 0) return 1;
 
-      return a.full_name.localeCompare(b.full_name);
-    });
+    const aOnline = onlineUsers.includes(String(a.id));
+    const bOnline = onlineUsers.includes(String(b.id));
 
-    return result;
-  }, [users, search, showOnlineOnly, onlineUsers]);
+    if (aOnline && !bOnline) return -1;
+    if (!aOnline && bOnline) return 1;
+
+    return a.full_name.localeCompare(b.full_name);
+  });
 
   return (
     <div
@@ -148,6 +133,7 @@ const Sidebar = () => {
           filteredUsers.map((user) => {
             const isOnline = onlineUsers.includes(String(user.id));
             const isSelected = Number(selectedUser?.id) === Number(user.id);
+            const unreadCount = getUnreadCount(user.id);
 
             return (
               <div
@@ -163,9 +149,13 @@ const Sidebar = () => {
                   cursor: "pointer",
                   border: isSelected
                     ? "1px solid #c48752"
+                    : unreadCount > 0
+                    ? "1px solid rgba(255, 59, 59, 0.55)"
                     : "1px solid transparent",
                   background: isSelected
                     ? "rgba(74, 27, 10, 0.9)"
+                    : unreadCount > 0
+                    ? "rgba(58, 18, 10, 0.92)"
                     : "rgba(38, 13, 6, 0.68)",
                   transition: "0.2s",
                 }}
@@ -222,6 +212,30 @@ const Sidebar = () => {
                       border: "2px solid #1d0b05",
                     }}
                   />
+
+                  {unreadCount > 0 && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "-4px",
+                        right: "-4px",
+                        background: "#ff3b3b",
+                        color: "#fff",
+                        fontSize: "11px",
+                        fontWeight: "700",
+                        borderRadius: "999px",
+                        minWidth: "20px",
+                        height: "20px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "0 6px",
+                        boxShadow: "0 0 0 2px #1d0b05",
+                      }}
+                    >
+                      {unreadCount}
+                    </div>
+                  )}
                 </div>
 
                 <div
@@ -233,7 +247,7 @@ const Sidebar = () => {
                   <div
                     style={{
                       color: "#f8dfc7",
-                      fontWeight: "700",
+                      fontWeight: unreadCount > 0 ? "800" : "700",
                       fontSize: "16px",
                       marginBottom: "3px",
                     }}
@@ -253,14 +267,17 @@ const Sidebar = () => {
 
                   <div
                     style={{
-                      color: "#af8969",
+                      color: unreadCount > 0 ? "#f8dfc7" : "#af8969",
                       fontSize: "12px",
+                      fontWeight: unreadCount > 0 ? "700" : "400",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                     }}
                   >
-                    {getLastMessagePreview(user.id)}
+                    {unreadCount > 0
+                      ? `Nova poruka (${unreadCount})`
+                      : "Klikni za otvaranje chata"}
                   </div>
                 </div>
               </div>

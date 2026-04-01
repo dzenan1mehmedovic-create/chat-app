@@ -36,22 +36,45 @@ const ChatContainer = () => {
   const isSelectedUserOnline = onlineUsers.includes(String(selectedUser?.id));
 
   useEffect(() => {
+    subscribeToMessages();
+
+    return () => unsubscribeFromMessages();
+  }, []);
+
+  useEffect(() => {
     if (!selectedUser) return;
 
     const loadChat = async () => {
       await getMessages(selectedUser.id);
       await markMessagesAsSeen(selectedUser.id);
-      subscribeToMessages();
     };
 
     loadChat();
-
-    return () => unsubscribeFromMessages();
   }, [selectedUser]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typingUserId]);
+
+  if (!selectedUser) {
+    return (
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background:
+            "radial-gradient(circle at top, rgba(43,15,7,0.9) 0%, rgba(19,6,2,1) 70%)",
+          color: "#d1a984",
+          fontSize: "18px",
+          fontWeight: "600",
+        }}
+      >
+        Odaberi kontakt za početak razgovora
+      </div>
+    );
+  }
 
   return (
     <div
@@ -242,11 +265,7 @@ const ChatContainer = () => {
                 >
                   <span>{formatMessageTime(msg.created_at)}</span>
 
-                  {isMe && (
-                    <span>
-                      {msg.seen ? "✓✓ Seen" : "✓ Sent"}
-                    </span>
-                  )}
+                  {isMe && <span>{msg.seen ? "✓✓ Seen" : "✓ Sent"}</span>}
                 </div>
               </div>
             </div>
