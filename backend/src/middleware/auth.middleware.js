@@ -10,10 +10,14 @@ export const protectRoute = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.userId = decoded.userId;
+    if (!decoded) {
+      return res.status(401).json({ message: "Neispravan token" });
+    }
 
+    req.userId = decoded.userId;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Nevalidan token" });
+    console.log("Greška u protectRoute:", error.message);
+    return res.status(401).json({ message: "Unauthorized" });
   }
 };
