@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useSocketStore } from "../store/useSocketStore";
+import { useThemeStore } from "../store/useThemeStore";
 import MessageInput from "./MessageInput";
 
 const BACKEND_URL = "http://localhost:5001";
@@ -31,13 +32,15 @@ const ChatContainer = () => {
 
   const { authUser } = useAuthStore();
   const { onlineUsers } = useSocketStore();
+  const { themes, currentThemeKey } = useThemeStore();
+
+  const theme = themes[currentThemeKey];
   const bottomRef = useRef(null);
 
   const isSelectedUserOnline = onlineUsers.includes(String(selectedUser?.id));
 
   useEffect(() => {
     subscribeToMessages();
-
     return () => unsubscribeFromMessages();
   }, []);
 
@@ -64,9 +67,8 @@ const ChatContainer = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background:
-            "radial-gradient(circle at top, rgba(43,15,7,0.9) 0%, rgba(19,6,2,1) 70%)",
-          color: "#d1a984",
+          background: theme.panelBg,
+          color: theme.subtext,
           fontSize: "18px",
           fontWeight: "600",
         }}
@@ -83,19 +85,18 @@ const ChatContainer = () => {
         display: "flex",
         flexDirection: "column",
         minWidth: 0,
-        background:
-          "radial-gradient(circle at top, rgba(43,15,7,0.9) 0%, rgba(19,6,2,1) 70%)",
+        background: theme.panelBg,
       }}
     >
       <div
         style={{
           height: "84px",
-          borderBottom: "1px solid rgba(196, 133, 82, 0.24)",
+          borderBottom: `1px solid ${theme.borderSoft}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           padding: "0 24px",
-          background: "rgba(29, 10, 5, 0.8)",
+          background: theme.panelSoft,
         }}
       >
         <div
@@ -121,7 +122,7 @@ const ChatContainer = () => {
                   height: "50px",
                   borderRadius: "50%",
                   objectFit: "cover",
-                  border: "2px solid #b57a4d",
+                  border: `2px solid ${theme.accent}`,
                 }}
               />
             ) : (
@@ -130,7 +131,7 @@ const ChatContainer = () => {
                   width: "50px",
                   height: "50px",
                   borderRadius: "50%",
-                  background: "#b57a4d",
+                  background: theme.accent,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -152,8 +153,8 @@ const ChatContainer = () => {
                 width: "12px",
                 height: "12px",
                 borderRadius: "50%",
-                background: isSelectedUserOnline ? "#76e04b" : "#7b726b",
-                border: "2px solid #1d0b05",
+                background: isSelectedUserOnline ? theme.online : theme.offline,
+                border: `2px solid ${theme.pageBg}`,
               }}
             />
           </div>
@@ -161,7 +162,7 @@ const ChatContainer = () => {
           <div>
             <div
               style={{
-                color: "#f8dfc7",
+                color: theme.text,
                 fontWeight: "800",
                 fontSize: "20px",
               }}
@@ -171,7 +172,7 @@ const ChatContainer = () => {
 
             <div
               style={{
-                color: isSelectedUserOnline ? "#76e04b" : "#c09a7a",
+                color: isSelectedUserOnline ? theme.online : theme.muted,
                 fontSize: "13px",
                 marginTop: "2px",
               }}
@@ -183,7 +184,7 @@ const ChatContainer = () => {
 
         <div
           style={{
-            color: "#d1a984",
+            color: theme.subtext,
             fontSize: "14px",
             fontWeight: "600",
           }}
@@ -216,13 +217,13 @@ const ChatContainer = () => {
               <div
                 style={{
                   maxWidth: "360px",
-                  background: isMe ? "#b57a4d" : "#2b130b",
+                  background: isMe ? theme.outgoing : theme.incoming,
                   color: "#fff",
                   padding: "14px 16px 10px 16px",
                   borderRadius: isMe
                     ? "18px 18px 6px 18px"
                     : "18px 18px 18px 6px",
-                  border: "1px solid rgba(196, 133, 82, 0.35)",
+                  border: `1px solid ${theme.border}`,
                   boxShadow: "0 6px 18px rgba(0,0,0,0.18)",
                   wordBreak: "break-word",
                 }}
@@ -264,7 +265,6 @@ const ChatContainer = () => {
                   }}
                 >
                   <span>{formatMessageTime(msg.created_at)}</span>
-
                   {isMe && <span>{msg.seen ? "✓✓ Seen" : "✓ Sent"}</span>}
                 </div>
               </div>
@@ -281,11 +281,11 @@ const ChatContainer = () => {
           >
             <div
               style={{
-                background: "#2b130b",
-                color: "#e2b992",
+                background: theme.incoming,
+                color: theme.subtext,
                 padding: "12px 16px",
                 borderRadius: "18px 18px 18px 6px",
-                border: "1px solid rgba(196, 133, 82, 0.35)",
+                border: `1px solid ${theme.border}`,
                 fontStyle: "italic",
                 maxWidth: "260px",
               }}

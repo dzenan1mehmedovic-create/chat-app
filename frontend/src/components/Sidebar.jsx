@@ -1,19 +1,21 @@
 import { useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useSocketStore } from "../store/useSocketStore";
+import { useThemeStore } from "../store/useThemeStore";
 
 const BACKEND_URL = "http://localhost:5001";
 
 const Sidebar = () => {
   const { users, setSelectedUser, selectedUser, unreadCounts } = useChatStore();
   const { onlineUsers } = useSocketStore();
+  const { themes, currentThemeKey } = useThemeStore();
+
+  const theme = themes[currentThemeKey];
 
   const [search, setSearch] = useState("");
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
-  const getUnreadCount = (userId) => {
-    return unreadCounts?.[userId] || 0;
-  };
+  const getUnreadCount = (userId) => unreadCounts?.[userId] || 0;
 
   let filteredUsers = [...users];
 
@@ -49,8 +51,8 @@ const Sidebar = () => {
     <div
       style={{
         width: "340px",
-        borderRight: "1px solid rgba(196, 133, 82, 0.28)",
-        background: "linear-gradient(180deg, #180803 0%, #130602 100%)",
+        borderRight: `1px solid ${theme.borderSoft}`,
+        background: theme.panelBg,
         display: "flex",
         flexDirection: "column",
         minWidth: "340px",
@@ -59,14 +61,14 @@ const Sidebar = () => {
       <div
         style={{
           padding: "24px 18px 16px 18px",
-          borderBottom: "1px solid rgba(196, 133, 82, 0.18)",
+          borderBottom: `1px solid ${theme.borderSoft}`,
         }}
       >
         <div
           style={{
             fontSize: "18px",
             fontWeight: "800",
-            color: "#f8dfc7",
+            color: theme.text,
             marginBottom: "16px",
           }}
         >
@@ -82,8 +84,8 @@ const Sidebar = () => {
             width: "100%",
             padding: "12px 14px",
             borderRadius: "14px",
-            border: "1px solid rgba(196, 133, 82, 0.3)",
-            background: "rgba(40, 14, 6, 0.8)",
+            border: `1px solid ${theme.border}`,
+            background: theme.inputBg,
             color: "#fff",
             outline: "none",
             fontSize: "14px",
@@ -97,7 +99,7 @@ const Sidebar = () => {
             display: "flex",
             alignItems: "center",
             gap: "10px",
-            color: "#d7ad88",
+            color: theme.subtext,
             fontSize: "14px",
             cursor: "pointer",
           }}
@@ -121,7 +123,7 @@ const Sidebar = () => {
         {filteredUsers.length === 0 ? (
           <div
             style={{
-              color: "#ba926d",
+              color: theme.muted,
               textAlign: "center",
               marginTop: "20px",
               fontSize: "14px",
@@ -148,15 +150,15 @@ const Sidebar = () => {
                   borderRadius: "18px",
                   cursor: "pointer",
                   border: isSelected
-                    ? "1px solid #c48752"
+                    ? `1px solid ${theme.accentStrong}`
                     : unreadCount > 0
-                    ? "1px solid rgba(255, 59, 59, 0.55)"
+                    ? `1px solid ${theme.unreadBorder}`
                     : "1px solid transparent",
                   background: isSelected
-                    ? "rgba(74, 27, 10, 0.9)"
+                    ? theme.panelSoft
                     : unreadCount > 0
-                    ? "rgba(58, 18, 10, 0.92)"
-                    : "rgba(38, 13, 6, 0.68)",
+                    ? theme.unreadBg
+                    : "rgba(255,255,255,0.03)",
                   transition: "0.2s",
                 }}
               >
@@ -177,7 +179,7 @@ const Sidebar = () => {
                         height: "52px",
                         borderRadius: "50%",
                         objectFit: "cover",
-                        border: "2px solid #b57a4d",
+                        border: `2px solid ${theme.accent}`,
                       }}
                     />
                   ) : (
@@ -186,7 +188,7 @@ const Sidebar = () => {
                         width: "52px",
                         height: "52px",
                         borderRadius: "50%",
-                        background: "#b57a4d",
+                        background: theme.accent,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -208,8 +210,8 @@ const Sidebar = () => {
                       width: "12px",
                       height: "12px",
                       borderRadius: "50%",
-                      background: isOnline ? "#76e04b" : "#7b726b",
-                      border: "2px solid #1d0b05",
+                      background: isOnline ? theme.online : theme.offline,
+                      border: `2px solid ${theme.pageBg}`,
                     }}
                   />
 
@@ -219,7 +221,7 @@ const Sidebar = () => {
                         position: "absolute",
                         top: "-4px",
                         right: "-4px",
-                        background: "#ff3b3b",
+                        background: theme.danger,
                         color: "#fff",
                         fontSize: "11px",
                         fontWeight: "700",
@@ -230,7 +232,7 @@ const Sidebar = () => {
                         alignItems: "center",
                         justifyContent: "center",
                         padding: "0 6px",
-                        boxShadow: "0 0 0 2px #1d0b05",
+                        boxShadow: `0 0 0 2px ${theme.pageBg}`,
                       }}
                     >
                       {unreadCount}
@@ -246,7 +248,7 @@ const Sidebar = () => {
                 >
                   <div
                     style={{
-                      color: "#f8dfc7",
+                      color: theme.text,
                       fontWeight: unreadCount > 0 ? "800" : "700",
                       fontSize: "16px",
                       marginBottom: "3px",
@@ -257,7 +259,7 @@ const Sidebar = () => {
 
                   <div
                     style={{
-                      color: isOnline ? "#76e04b" : "#b48f71",
+                      color: isOnline ? theme.online : theme.muted,
                       fontSize: "13px",
                       marginBottom: "4px",
                     }}
@@ -267,7 +269,7 @@ const Sidebar = () => {
 
                   <div
                     style={{
-                      color: unreadCount > 0 ? "#f8dfc7" : "#af8969",
+                      color: unreadCount > 0 ? theme.text : theme.muted,
                       fontSize: "12px",
                       fontWeight: unreadCount > 0 ? "700" : "400",
                       whiteSpace: "nowrap",

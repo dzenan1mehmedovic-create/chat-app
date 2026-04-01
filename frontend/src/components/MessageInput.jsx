@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useSocketStore } from "../store/useSocketStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { useThemeStore } from "../store/useThemeStore";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
@@ -13,6 +14,9 @@ const MessageInput = () => {
   const { sendMessage, selectedUser } = useChatStore();
   const { socket } = useSocketStore();
   const { authUser } = useAuthStore();
+  const { themes, currentThemeKey } = useThemeStore();
+
+  const theme = themes[currentThemeKey];
 
   const emitStopTyping = () => {
     if (!socket || !selectedUser) return;
@@ -81,16 +85,16 @@ const MessageInput = () => {
   return (
     <div
       style={{
-        borderTop: "1px solid rgba(196, 133, 82, 0.24)",
+        borderTop: `1px solid ${theme.borderSoft}`,
         padding: "18px 22px",
-        background: "rgba(25, 9, 4, 0.82)",
+        background: theme.panelSoft,
       }}
     >
       {imageName && (
         <div
           style={{
             marginBottom: "10px",
-            color: "#ddb38e",
+            color: theme.subtext,
             fontSize: "13px",
           }}
         >
@@ -119,8 +123,8 @@ const MessageInput = () => {
             height: "56px",
             padding: "0 18px",
             borderRadius: "16px",
-            border: "1px solid rgba(196, 133, 82, 0.35)",
-            background: "rgba(39, 13, 6, 0.9)",
+            border: `1px solid ${theme.border}`,
+            background: theme.inputBg,
             color: "#fff",
             fontWeight: "700",
             fontSize: "18px",
@@ -140,8 +144,8 @@ const MessageInput = () => {
             flex: 1,
             height: "56px",
             borderRadius: "16px",
-            border: "1px solid rgba(196, 133, 82, 0.35)",
-            background: "rgba(39, 13, 6, 0.9)",
+            border: `1px solid ${theme.border}`,
+            background: theme.inputBg,
             color: "#fff",
             outline: "none",
             padding: "0 18px",
@@ -157,7 +161,7 @@ const MessageInput = () => {
             padding: "0 22px",
             borderRadius: "16px",
             border: "none",
-            background: "#b57a4d",
+            background: theme.accent,
             color: "#fff",
             fontWeight: "800",
             fontSize: "16px",

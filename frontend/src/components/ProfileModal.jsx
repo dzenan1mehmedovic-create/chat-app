@@ -1,14 +1,18 @@
 import { useMemo, useRef, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
+import { useThemeStore } from "../store/useThemeStore";
 
 const BACKEND_URL = "http://localhost:5001";
 
 const ProfileModal = ({ onClose }) => {
   const { authUser, updateProfile, isUpdatingProfile } = useAuthStore();
+  const { themes, currentThemeKey, setTheme } = useThemeStore();
 
   const [fullName, setFullName] = useState(authUser?.full_name || "");
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
+
+  const theme = themes[currentThemeKey];
 
   const previewUrl = useMemo(() => {
     if (selectedFile) {
@@ -56,12 +60,14 @@ const ProfileModal = ({ onClose }) => {
     >
       <div
         style={{
-          width: "420px",
-          background: "#1b0a05",
-          border: "1px solid rgba(196, 133, 82, 0.35)",
+          width: "460px",
+          maxHeight: "90vh",
+          overflowY: "auto",
+          background: theme.pageBg,
+          border: `1px solid ${theme.border}`,
           borderRadius: "22px",
           padding: "24px",
-          color: "#f8dfc7",
+          color: theme.text,
           boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
         }}
       >
@@ -106,7 +112,7 @@ const ProfileModal = ({ onClose }) => {
                 height: "110px",
                 borderRadius: "50%",
                 objectFit: "cover",
-                border: "3px solid #b57a4d",
+                border: `3px solid ${theme.accent}`,
               }}
             />
           ) : (
@@ -115,7 +121,7 @@ const ProfileModal = ({ onClose }) => {
                 width: "110px",
                 height: "110px",
                 borderRadius: "50%",
-                background: "#b57a4d",
+                background: theme.accent,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -141,7 +147,7 @@ const ProfileModal = ({ onClose }) => {
             onClick={() => fileInputRef.current?.click()}
             style={{
               border: "none",
-              background: "#b57a4d",
+              background: theme.accent,
               color: "#fff",
               borderRadius: "12px",
               padding: "10px 16px",
@@ -158,7 +164,7 @@ const ProfileModal = ({ onClose }) => {
             style={{
               display: "block",
               marginBottom: "8px",
-              color: "#ddb38e",
+              color: theme.subtext,
               fontSize: "14px",
             }}
           >
@@ -173,8 +179,8 @@ const ProfileModal = ({ onClose }) => {
               width: "100%",
               height: "48px",
               borderRadius: "14px",
-              border: "1px solid rgba(196, 133, 82, 0.35)",
-              background: "rgba(39, 13, 6, 0.9)",
+              border: `1px solid ${theme.border}`,
+              background: theme.inputBg,
               color: "#fff",
               outline: "none",
               padding: "0 14px",
@@ -184,12 +190,12 @@ const ProfileModal = ({ onClose }) => {
           />
         </div>
 
-        <div style={{ marginBottom: "22px" }}>
+        <div style={{ marginBottom: "18px" }}>
           <label
             style={{
               display: "block",
               marginBottom: "8px",
-              color: "#ddb38e",
+              color: theme.subtext,
               fontSize: "14px",
             }}
           >
@@ -204,15 +210,99 @@ const ProfileModal = ({ onClose }) => {
               width: "100%",
               height: "48px",
               borderRadius: "14px",
-              border: "1px solid rgba(196, 133, 82, 0.2)",
-              background: "rgba(26, 10, 5, 0.75)",
-              color: "#caa785",
+              border: `1px solid ${theme.borderSoft}`,
+              background: theme.panelSoft,
+              color: theme.muted,
               outline: "none",
               padding: "0 14px",
               boxSizing: "border-box",
               fontSize: "15px",
             }}
           />
+        </div>
+
+        <div style={{ marginBottom: "22px" }}>
+          <div
+            style={{
+              marginBottom: "10px",
+              color: theme.subtext,
+              fontSize: "14px",
+            }}
+          >
+            Chat theme
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: "12px",
+            }}
+          >
+            {Object.entries(themes).map(([key, item]) => {
+              const active = currentThemeKey === key;
+
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setTheme(key)}
+                  style={{
+                    border: active
+                      ? `2px solid ${theme.accentStrong}`
+                      : `1px solid ${theme.border}`,
+                    background: item.panelBg,
+                    color: "#fff",
+                    borderRadius: "14px",
+                    padding: "12px",
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: "700",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    {item.name}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "8px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "22px",
+                        height: "22px",
+                        borderRadius: "50%",
+                        background: item.accent,
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: "22px",
+                        height: "22px",
+                        borderRadius: "50%",
+                        background: item.incoming,
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: "22px",
+                        height: "22px",
+                        borderRadius: "50%",
+                        background: item.outgoing,
+                      }}
+                    />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div
@@ -225,9 +315,9 @@ const ProfileModal = ({ onClose }) => {
           <button
             onClick={onClose}
             style={{
-              border: "1px solid rgba(196, 133, 82, 0.35)",
+              border: `1px solid ${theme.border}`,
               background: "transparent",
-              color: "#f7d7b8",
+              color: theme.text,
               borderRadius: "12px",
               padding: "10px 16px",
               cursor: "pointer",
@@ -242,7 +332,7 @@ const ProfileModal = ({ onClose }) => {
             disabled={isUpdatingProfile}
             style={{
               border: "none",
-              background: "#b57a4d",
+              background: theme.accent,
               color: "#fff",
               borderRadius: "12px",
               padding: "10px 16px",
