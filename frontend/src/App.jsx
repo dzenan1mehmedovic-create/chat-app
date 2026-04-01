@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "./store/useAuthStore";
 import { useThemeStore } from "./store/useThemeStore";
 import LoginPage from "./pages/LoginPage";
@@ -35,14 +36,31 @@ function App() {
     );
   }
 
-  if (authUser) {
-    return <HomePage />;
-  }
+  return (
+    <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 2500,
+          style: {
+            background: theme.panelSoft,
+            color: theme.text,
+            border: `1px solid ${theme.border}`,
+            borderRadius: "14px",
+            padding: "12px 14px",
+            fontWeight: "700",
+          },
+        }}
+      />
 
-  return isLoginMode ? (
-    <LoginPage goToSignup={() => setIsLoginMode(false)} />
-  ) : (
-    <SignUpPage goToLogin={() => setIsLoginMode(true)} />
+      {authUser ? (
+        <HomePage />
+      ) : isLoginMode ? (
+        <LoginPage goToSignup={() => setIsLoginMode(false)} />
+      ) : (
+        <SignUpPage goToLogin={() => setIsLoginMode(true)} />
+      )}
+    </>
   );
 }
 

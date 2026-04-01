@@ -1,7 +1,60 @@
 import { create } from "zustand";
+import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios.js";
 import { useSocketStore } from "./useSocketStore.js";
 import { useAuthStore } from "./useAuthStore.js";
+
+const playNotificationSound = () => {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) return;
+
+    const audioContext = new AudioContextClass();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(
+      660,
+      audioContext.currentTime + 0.18,
+    );
+
+    gainNode.gain.setValueAtTime(0.001, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.08,
+      audioContext.currentTime + 0.02,
+    );
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.001,
+      audioContext.currentTime + 0.22,
+    );
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.22);
+
+    oscillator.onended = () => {
+      audioContext.close();
+    };
+  } catch (error) {
+    console.log("Notification sound error:", error);
+  }
+};
+
+const getMessagePreview = (message) => {
+  if (message.image && !message.text) return "📷 Poslana slika";
+  if (message.image && message.text) return `📷 ${message.text}`;
+  if (message.text)
+    return message.text.length > 35
+      ? `${message.text.slice(0, 35)}...`
+      : message.text;
+
+  return "Nova poruka";
+};
 
 export const useChatStore = create((set, get) => ({
   users: [],
@@ -118,6 +171,7 @@ export const useChatStore = create((set, get) => ({
 
     socket.on("newMessage", (newMessage) => {
       const currentSelectedUser = get().selectedUser;
+      const users = get().users;
 
       const isOwnMessage =
         Number(newMessage.sender_id) === Number(authUser?.id);
@@ -138,7 +192,17 @@ export const useChatStore = create((set, get) => ({
         }));
 
         get().markMessagesAsSeen(newMessage.sender_id);
-      } else if (!isOwnMessage) {
+        return;
+      }
+
+      if (!isOwnMessage) {
+        const sender = users.find(
+          (user) => Number(user.id) === Number(newMessage.sender_id),
+        );
+
+        const senderName = sender?.full_name || "Nova poruka";
+        const preview = getMessagePreview(newMessage);
+
         set((state) => ({
           unreadCounts: {
             ...state.unreadCounts,
@@ -146,6 +210,9 @@ export const useChatStore = create((set, get) => ({
               (state.unreadCounts[newMessage.sender_id] || 0) + 1,
           },
         }));
+
+        toast(`${senderName}: ${preview}`);
+        playNotificationSound();
       }
     });
 
