@@ -1,13 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { useAuthStore } from "../store/useAuthStore.js";
+import { useAuthStore } from "../store/useAuthStore";
 
-const LoginPage = () => {
-  const navigate = useNavigate();
-  const { login, isLoggingIn } = useAuthStore();
+const SignUpPage = ({ goToLogin }) => {
+  const { signup, isSigningUp } = useAuthStore();
 
   const [formData, setFormData] = useState({
+    full_name: "",
     email: "",
     password: "",
   });
@@ -15,73 +13,125 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const result = await login(formData);
+    const result = await signup(formData);
 
     if (!result.success) {
-      toast.error(result.message);
-      return;
+      alert(result.message);
     }
-
-    toast.success("Uspješna prijava");
-    navigate("/");
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-base-100 px-4">
-      <div className="card w-full max-w-md bg-base-200 shadow-xl">
-        <div className="card-body">
-          <h1 className="text-center text-3xl font-bold text-primary">Login</h1>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#140904",
+        color: "#f5d2b3",
+      }}
+    >
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          width: "360px",
+          padding: "28px",
+          borderRadius: "16px",
+          backgroundColor: "#1b0c05",
+          border: "1px solid #8b5e3c",
+          display: "flex",
+          flexDirection: "column",
+          gap: "14px",
+        }}
+      >
+        <h2 style={{ margin: 0, textAlign: "center" }}>Registracija</h2>
 
-          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <label className="label">
-                <span className="label-text">Email</span>
-              </label>
-              <input
-                type="email"
-                className="input input-bordered w-full"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                placeholder="Unesi email"
-              />
-            </div>
+        <input
+          type="text"
+          placeholder="Puno ime"
+          value={formData.full_name}
+          onChange={(e) =>
+            setFormData({ ...formData, full_name: e.target.value })
+          }
+          style={{
+            padding: "12px",
+            borderRadius: "10px",
+            border: "1px solid #8b5e3c",
+            backgroundColor: "#140904",
+            color: "#fff",
+            outline: "none",
+          }}
+        />
 
-            <div>
-              <label className="label">
-                <span className="label-text">Password</span>
-              </label>
-              <input
-                type="password"
-                className="input input-bordered w-full"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                placeholder="Unesi password"
-              />
-            </div>
+        <input
+          type="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={(e) =>
+            setFormData({ ...formData, email: e.target.value })
+          }
+          style={{
+            padding: "12px",
+            borderRadius: "10px",
+            border: "1px solid #8b5e3c",
+            backgroundColor: "#140904",
+            color: "#fff",
+            outline: "none",
+          }}
+        />
 
-            <button
-              type="submit"
-              className="btn btn-primary w-full"
-              disabled={isLoggingIn}
-            >
-              {isLoggingIn ? "Prijava..." : "Login"}
-            </button>
-          </form>
+        <input
+          type="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={(e) =>
+            setFormData({ ...formData, password: e.target.value })
+          }
+          style={{
+            padding: "12px",
+            borderRadius: "10px",
+            border: "1px solid #8b5e3c",
+            backgroundColor: "#140904",
+            color: "#fff",
+            outline: "none",
+          }}
+        />
 
-          <p className="mt-4 text-center text-sm">
-            Nemaš račun?{" "}
-            <Link to="/signup" className="link link-primary">
-              Registruj se
-            </Link>
-          </p>
-        </div>
-      </div>
+        <button
+          type="submit"
+          disabled={isSigningUp}
+          style={{
+            padding: "12px",
+            borderRadius: "10px",
+            border: "none",
+            backgroundColor: "#8b5e3c",
+            color: "#fff",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
+        >
+          {isSigningUp ? "Registracija..." : "Sign Up"}
+        </button>
+
+        <p style={{ textAlign: "center", margin: 0 }}>
+          Već imaš račun?{" "}
+          <button
+            type="button"
+            onClick={goToLogin}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#d9a679",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            Login
+          </button>
+        </p>
+      </form>
     </div>
   );
 };
 
-export default LoginPage;
+export default SignUpPage;

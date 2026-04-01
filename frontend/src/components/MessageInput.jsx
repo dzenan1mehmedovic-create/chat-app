@@ -1,15 +1,55 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
+import { useSocketStore } from "../store/useSocketStore";
+import { useAuthStore } from "../store/useAuthStore";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
-  const { sendMessage } = useChatStore();
+  const typingTimeoutRef = useRef(null);
+
+  const { sendMessage, selectedUser } = useChatStore();
+  const { socket } = useSocketStore();
+  const { authUser } = useAuthStore();
+
+  const emitStopTyping = () => {
+    if (!socket || !selectedUser) return;
+
+    socket.emit("stopTyping", {
+      receiverId: selectedUser.id,
+    });
+  };
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setText(value);
+
+    if (!socket || !selectedUser || !authUser) return;
+
+    if (value.trim()) {
+      socket.emit("typing", {
+        receiverId: selectedUser.id,
+        senderName: authUser.full_name,
+      });
+
+      clearTimeout(typingTimeoutRef.current);
+
+      typingTimeoutRef.current = setTimeout(() => {
+        emitStopTyping();
+      }, 1200);
+    } else {
+      clearTimeout(typingTimeoutRef.current);
+      emitStopTyping();
+    }
+  };
 
   const handleSend = async () => {
     if (!text.trim()) return;
 
     await sendMessage({ text });
     setText("");
+
+    clearTimeout(typingTimeoutRef.current);
+    emitStopTyping();
   };
 
   const handleKeyDown = async (e) => {
@@ -32,7 +72,7 @@ const MessageInput = () => {
       <input
         type="text"
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder="Upiši poruku..."
         style={{

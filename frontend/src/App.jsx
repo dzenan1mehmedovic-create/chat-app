@@ -1,13 +1,12 @@
-import { useEffect } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
-import { useAuthStore } from "./store/useAuthStore.js";
-import LoginPage from "./pages/LoginPage.jsx";
-import SignUpPage from "./pages/SignUpPage.jsx";
-import HomePage from "./pages/HomePage.jsx";
+import { useEffect, useState } from "react";
+import { useAuthStore } from "./store/useAuthStore";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
+import HomePage from "./pages/HomePage";
 
-const App = () => {
+function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+  const [isLoginMode, setIsLoginMode] = useState(true);
 
   useEffect(() => {
     checkAuth();
@@ -15,32 +14,32 @@ const App = () => {
 
   if (isCheckingAuth) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#140904",
+          color: "#f5d2b3",
+          fontSize: "24px",
+          fontWeight: "bold",
+        }}
+      >
+        Učitavanje...
       </div>
     );
   }
 
-  return (
-    <>
-      <Routes>
-        <Route
-          path="/"
-          element={authUser ? <HomePage /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/signup"
-          element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
-        />
-        <Route
-          path="/login"
-          element={!authUser ? <LoginPage /> : <Navigate to="/" />}
-        />
-      </Routes>
+  if (authUser) {
+    return <HomePage />;
+  }
 
-      <Toaster />
-    </>
+  return isLoginMode ? (
+    <LoginPage goToSignup={() => setIsLoginMode(false)} />
+  ) : (
+    <SignUpPage goToLogin={() => setIsLoginMode(true)} />
   );
-};
+}
 
 export default App;

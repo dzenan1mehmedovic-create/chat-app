@@ -3,6 +3,17 @@ import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import MessageInput from "./MessageInput";
 
+const formatMessageTime = (dateString) => {
+  if (!dateString) return "";
+
+  const date = new Date(dateString);
+
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
 const ChatContainer = () => {
   const {
     selectedUser,
@@ -10,6 +21,8 @@ const ChatContainer = () => {
     getMessages,
     subscribeToMessages,
     unsubscribeFromMessages,
+    typingUserId,
+    typingUserName,
   } = useChatStore();
 
   const { authUser } = useAuthStore();
@@ -26,7 +39,7 @@ const ChatContainer = () => {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, typingUserId]);
 
   return (
     <div
@@ -35,6 +48,7 @@ const ChatContainer = () => {
         display: "flex",
         flexDirection: "column",
         height: "100vh",
+        backgroundColor: "#140904",
       }}
     >
       <div
@@ -81,11 +95,44 @@ const ChatContainer = () => {
                   border: "1px solid #8b5e3c",
                 }}
               >
-                {msg.text}
+                <div style={{ marginBottom: "4px" }}>{msg.text}</div>
+
+                <div
+                  style={{
+                    fontSize: "11px",
+                    opacity: 0.7,
+                    textAlign: "right",
+                  }}
+                >
+                  {formatMessageTime(msg.created_at)}
+                </div>
               </div>
             </div>
           );
         })}
+
+        {typingUserId && Number(typingUserId) === Number(selectedUser.id) && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-start",
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "#2f1c12",
+                color: "#d8b08b",
+                padding: "10px 14px",
+                borderRadius: "14px",
+                border: "1px solid #8b5e3c",
+                fontStyle: "italic",
+                maxWidth: "60%",
+              }}
+            >
+              {typingUserName || selectedUser.full_name} kuca...
+            </div>
+          </div>
+        )}
 
         <div ref={bottomRef}></div>
       </div>

@@ -63,16 +63,37 @@ io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
 
   if (userId) {
-    userSocketMap[userId] = socket.id;
+    userSocketMap[String(userId)] = socket.id;
   }
 
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+  socket.on("typing", ({ receiverId, senderName }) => {
+    const receiverSocketId = getReceiverSocketId(String(receiverId));
+
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("showTyping", {
+        senderId: String(userId),
+        senderName,
+      });
+    }
+  });
+
+  socket.on("stopTyping", ({ receiverId }) => {
+    const receiverSocketId = getReceiverSocketId(String(receiverId));
+
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("hideTyping", {
+        senderId: String(userId),
+      });
+    }
+  });
 
   socket.on("disconnect", () => {
     console.log("Korisnik diskonektovan:", socket.id);
 
     if (userId) {
-      delete userSocketMap[userId];
+      delete userSocketMap[String(userId)];
     }
 
     io.emit("getOnlineUsers", Object.keys(userSocketMap));

@@ -8,6 +8,8 @@ export const useChatStore = create((set, get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
+  typingUserId: null,
+  typingUserName: "",
 
   getUsers: async () => {
     set({ isUsersLoading: true });
@@ -50,7 +52,12 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setSelectedUser: (selectedUser) =>
+    set({
+      selectedUser,
+      typingUserId: null,
+      typingUserName: "",
+    }),
 
   subscribeToMessages: () => {
     const { selectedUser } = get();
@@ -59,11 +66,35 @@ export const useChatStore = create((set, get) => ({
     const socket = useSocketStore.getState().socket;
     if (!socket) return;
 
+    socket.off("newMessage");
+    socket.off("showTyping");
+    socket.off("hideTyping");
+
     socket.on("newMessage", (newMessage) => {
       if (Number(newMessage.sender_id) !== Number(selectedUser.id)) return;
 
       set({
         messages: [...get().messages, newMessage],
+        typingUserId: null,
+        typingUserName: "",
+      });
+    });
+
+    socket.on("showTyping", (data) => {
+      if (Number(data.senderId) !== Number(selectedUser.id)) return;
+
+      set({
+        typingUserId: data.senderId,
+        typingUserName: data.senderName,
+      });
+    });
+
+    socket.on("hideTyping", (data) => {
+      if (Number(data.senderId) !== Number(selectedUser.id)) return;
+
+      set({
+        typingUserId: null,
+        typingUserName: "",
       });
     });
   },
@@ -72,6 +103,8 @@ export const useChatStore = create((set, get) => ({
     const socket = useSocketStore.getState().socket;
     if (socket) {
       socket.off("newMessage");
+      socket.off("showTyping");
+      socket.off("hideTyping");
     }
   },
 }));
