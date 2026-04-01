@@ -4,6 +4,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { connectDB, db } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
+import http from "http";
+import { Server } from "socket.io";
 
 dotenv.config();
 
@@ -40,9 +42,44 @@ app.get("/test-db", async (req, res) => {
 
 app.use("/api/auth", authRoutes);
 
+const server = http.createServer(app);
+
+export const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  },
+});
+
+const userSocketMap = {};
+
+export const getReceiverSocketId = (userId) => userSocketMap[userId];
+
+io.on("connection", (socket) => {
+  console.log("Korisnik povezan:", socket.id);
+
+  const userId = socket.handshake.query.userId;
+
+  if (userId) {
+    userSocketMap[userId] = socket.id;
+  }
+
+  io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+  socket.on("disconnect", () => {
+    console.log("Korisnik diskonektovan:", socket.id);
+
+    if (userId) {
+      delete userSocketMap[userId];
+    }
+
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+  });
+});
+
 const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, async () => {
+server.listen(PORT, async () => {
   console.log(`Server radi na portu ${PORT}`);
   await connectDB();
 });
