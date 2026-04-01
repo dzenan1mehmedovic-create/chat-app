@@ -62,45 +62,55 @@ const MessageInput = () => {
   return (
     <div
       style={{
-        display: "flex",
-        gap: "10px",
-        padding: "14px",
-        borderTop: "1px solid #8b5e3c",
-        backgroundColor: "#140904",
+        borderTop: "1px solid rgba(196, 133, 82, 0.24)",
+        padding: "18px 22px",
+        background: "rgba(25, 9, 4, 0.82)",
       }}
     >
-      <input
-        type="text"
-        value={text}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        placeholder="Upiši poruku..."
+      <div
         style={{
-          flex: 1,
-          padding: "12px 14px",
-          borderRadius: "12px",
-          border: "1px solid #8b5e3c",
-          outline: "none",
-          backgroundColor: "#1b0c05",
-          color: "#fff",
-          fontSize: "15px",
-        }}
-      />
-
-      <button
-        onClick={handleSend}
-        style={{
-          padding: "12px 18px",
-          borderRadius: "12px",
-          border: "none",
-          backgroundColor: "#8b5e3c",
-          color: "#fff",
-          fontWeight: "bold",
-          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
         }}
       >
-        Pošalji
-      </button>
+        <input
+          type="text"
+          value={text}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          placeholder="Type a message..."
+          style={{
+            flex: 1,
+            height: "56px",
+            borderRadius: "16px",
+            border: "1px solid rgba(196, 133, 82, 0.35)",
+            background: "rgba(39, 13, 6, 0.9)",
+            color: "#fff",
+            outline: "none",
+            padding: "0 18px",
+            fontSize: "15px",
+            boxSizing: "border-box",
+          }}
+        />
+
+        <button
+          onClick={handleSend}
+          style={{
+            height: "56px",
+            padding: "0 22px",
+            borderRadius: "16px",
+            border: "none",
+            background: "#b57a4d",
+            color: "#fff",
+            fontWeight: "800",
+            fontSize: "16px",
+            cursor: "pointer",
+          }}
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
 };

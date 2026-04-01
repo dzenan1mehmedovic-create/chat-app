@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { useSocketStore } from "../store/useSocketStore";
 import MessageInput from "./MessageInput";
 
 const formatMessageTime = (dateString) => {
@@ -26,7 +27,10 @@ const ChatContainer = () => {
   } = useChatStore();
 
   const { authUser } = useAuthStore();
+  const { onlineUsers } = useSocketStore();
   const bottomRef = useRef(null);
+
+  const isSelectedUserOnline = onlineUsers.includes(String(selectedUser?.id));
 
   useEffect(() => {
     if (!selectedUser) return;
@@ -35,7 +39,7 @@ const ChatContainer = () => {
     subscribeToMessages();
 
     return () => unsubscribeFromMessages();
-  }, [selectedUser]);
+  }, [selectedUser, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -47,30 +51,110 @@ const ChatContainer = () => {
         flex: 1,
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
-        backgroundColor: "#140904",
+        minWidth: 0,
+        background:
+          "radial-gradient(circle at top, rgba(43,15,7,0.9) 0%, rgba(19,6,2,1) 70%)",
       }}
     >
       <div
         style={{
-          padding: "16px",
-          borderBottom: "1px solid #8b5e3c",
-          color: "#f5d2b3",
-          fontWeight: "bold",
-          fontSize: "24px",
+          height: "84px",
+          borderBottom: "1px solid rgba(196, 133, 82, 0.24)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 24px",
+          background: "rgba(29, 10, 5, 0.8)",
         }}
       >
-        {selectedUser.full_name}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "14px",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              width: "50px",
+              height: "50px",
+            }}
+          >
+            <div
+              style={{
+                width: "50px",
+                height: "50px",
+                borderRadius: "50%",
+                background: "#b57a4d",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#fff",
+                fontWeight: "800",
+                fontSize: "20px",
+                textTransform: "uppercase",
+              }}
+            >
+              {selectedUser?.full_name?.charAt(0)}
+            </div>
+
+            <div
+              style={{
+                position: "absolute",
+                bottom: "2px",
+                right: "2px",
+                width: "12px",
+                height: "12px",
+                borderRadius: "50%",
+                background: isSelectedUserOnline ? "#76e04b" : "#7b726b",
+                border: "2px solid #1d0b05",
+              }}
+            />
+          </div>
+
+          <div>
+            <div
+              style={{
+                color: "#f8dfc7",
+                fontWeight: "800",
+                fontSize: "20px",
+              }}
+            >
+              {selectedUser?.full_name}
+            </div>
+
+            <div
+              style={{
+                color: isSelectedUserOnline ? "#76e04b" : "#c09a7a",
+                fontSize: "13px",
+                marginTop: "2px",
+              }}
+            >
+              {isSelectedUserOnline ? "Online" : "Offline"}
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            color: "#d1a984",
+            fontSize: "14px",
+            fontWeight: "600",
+          }}
+        >
+          Chat active
+        </div>
       </div>
 
       <div
         style={{
           flex: 1,
-          padding: "16px",
           overflowY: "auto",
+          padding: "24px",
           display: "flex",
           flexDirection: "column",
-          gap: "10px",
+          gap: "14px",
         }}
       >
         {messages.map((msg) => {
@@ -86,21 +170,32 @@ const ChatContainer = () => {
             >
               <div
                 style={{
-                  backgroundColor: isMe ? "#8b5e3c" : "#2f1c12",
+                  maxWidth: "360px",
+                  background: isMe ? "#b57a4d" : "#2b130b",
                   color: "#fff",
-                  padding: "10px 14px",
-                  borderRadius: "14px",
-                  maxWidth: "60%",
+                  padding: "14px 16px 10px 16px",
+                  borderRadius: isMe
+                    ? "18px 18px 6px 18px"
+                    : "18px 18px 18px 6px",
+                  border: "1px solid rgba(196, 133, 82, 0.35)",
+                  boxShadow: "0 6px 18px rgba(0,0,0,0.18)",
                   wordBreak: "break-word",
-                  border: "1px solid #8b5e3c",
                 }}
               >
-                <div style={{ marginBottom: "4px" }}>{msg.text}</div>
+                <div
+                  style={{
+                    fontSize: "17px",
+                    lineHeight: "1.4",
+                    marginBottom: "6px",
+                  }}
+                >
+                  {msg.text}
+                </div>
 
                 <div
                   style={{
                     fontSize: "11px",
-                    opacity: 0.7,
+                    opacity: 0.78,
                     textAlign: "right",
                   }}
                 >
@@ -120,13 +215,13 @@ const ChatContainer = () => {
           >
             <div
               style={{
-                backgroundColor: "#2f1c12",
-                color: "#d8b08b",
-                padding: "10px 14px",
-                borderRadius: "14px",
-                border: "1px solid #8b5e3c",
+                background: "#2b130b",
+                color: "#e2b992",
+                padding: "12px 16px",
+                borderRadius: "18px 18px 18px 6px",
+                border: "1px solid rgba(196, 133, 82, 0.35)",
                 fontStyle: "italic",
-                maxWidth: "60%",
+                maxWidth: "260px",
               }}
             >
               {typingUserName || selectedUser.full_name} kuca...
@@ -134,7 +229,7 @@ const ChatContainer = () => {
           </div>
         )}
 
-        <div ref={bottomRef}></div>
+        <div ref={bottomRef} />
       </div>
 
       <MessageInput />
