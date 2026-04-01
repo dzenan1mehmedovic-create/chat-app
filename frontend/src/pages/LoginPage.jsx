@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
+import { useThemeStore } from "../store/useThemeStore";
 
 const LoginPage = ({ goToSignup }) => {
   const { login, isLoggingIn } = useAuthStore();
+  const { themes, currentThemeKey } = useThemeStore();
+
+  const theme = themes[currentThemeKey];
 
   const [formData, setFormData] = useState({
     email: "",
@@ -26,24 +30,47 @@ const LoginPage = ({ goToSignup }) => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#140904",
-        color: "#f5d2b3",
+        background: theme.panelBg,
+        color: theme.text,
+        padding: "20px",
       }}
     >
       <form
         onSubmit={handleSubmit}
         style={{
-          width: "360px",
-          padding: "28px",
-          borderRadius: "16px",
-          backgroundColor: "#1b0c05",
-          border: "1px solid #8b5e3c",
+          width: "380px",
+          padding: "30px",
+          borderRadius: "22px",
+          background: theme.panelSoft,
+          border: `1px solid ${theme.border}`,
           display: "flex",
           flexDirection: "column",
           gap: "14px",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
         }}
       >
-        <h2 style={{ margin: 0, textAlign: "center" }}>Login</h2>
+        <h2
+          style={{
+            margin: 0,
+            textAlign: "center",
+            color: theme.text,
+            fontSize: "30px",
+            fontWeight: "800",
+          }}
+        >
+          Login
+        </h2>
+
+        <p
+          style={{
+            margin: "0 0 10px 0",
+            textAlign: "center",
+            color: theme.subtext,
+            fontSize: "14px",
+          }}
+        >
+          Dobrodošao nazad u Chatty
+        </p>
 
         <input
           type="email"
@@ -53,12 +80,13 @@ const LoginPage = ({ goToSignup }) => {
             setFormData({ ...formData, email: e.target.value })
           }
           style={{
-            padding: "12px",
-            borderRadius: "10px",
-            border: "1px solid #8b5e3c",
-            backgroundColor: "#140904",
+            padding: "14px",
+            borderRadius: "14px",
+            border: `1px solid ${theme.border}`,
+            background: theme.inputBg,
             color: "#fff",
             outline: "none",
+            fontSize: "15px",
           }}
         />
 
@@ -70,12 +98,13 @@ const LoginPage = ({ goToSignup }) => {
             setFormData({ ...formData, password: e.target.value })
           }
           style={{
-            padding: "12px",
-            borderRadius: "10px",
-            border: "1px solid #8b5e3c",
-            backgroundColor: "#140904",
+            padding: "14px",
+            borderRadius: "14px",
+            border: `1px solid ${theme.border}`,
+            background: theme.inputBg,
             color: "#fff",
             outline: "none",
+            fontSize: "15px",
           }}
         />
 
@@ -83,19 +112,26 @@ const LoginPage = ({ goToSignup }) => {
           type="submit"
           disabled={isLoggingIn}
           style={{
-            padding: "12px",
-            borderRadius: "10px",
+            padding: "14px",
+            borderRadius: "14px",
             border: "none",
-            backgroundColor: "#8b5e3c",
+            background: theme.accent,
             color: "#fff",
-            fontWeight: "bold",
+            fontWeight: "800",
+            fontSize: "15px",
             cursor: "pointer",
           }}
         >
           {isLoggingIn ? "Prijava..." : "Login"}
         </button>
 
-        <p style={{ textAlign: "center", margin: 0 }}>
+        <p
+          style={{
+            textAlign: "center",
+            margin: "6px 0 0 0",
+            color: theme.subtext,
+          }}
+        >
           Nemaš račun?{" "}
           <button
             type="button"
@@ -103,9 +139,10 @@ const LoginPage = ({ goToSignup }) => {
             style={{
               background: "none",
               border: "none",
-              color: "#d9a679",
+              color: theme.accentStrong,
               cursor: "pointer",
-              fontWeight: "bold",
+              fontWeight: "800",
+              fontSize: "14px",
             }}
           >
             Registruj se

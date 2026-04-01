@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { useAuthStore } from "../store/useAuthStore.js";
+import { useAuthStore } from "../store/useAuthStore";
+import { useThemeStore } from "../store/useThemeStore";
 
-const SignUpPage = () => {
-  const navigate = useNavigate();
+const SignUpPage = ({ goToLogin }) => {
   const { signup, isSigningUp } = useAuthStore();
+  const { themes, currentThemeKey } = useThemeStore();
+
+  const theme = themes[currentThemeKey];
 
   const [formData, setFormData] = useState({
     full_name: "",
@@ -19,85 +20,154 @@ const SignUpPage = () => {
     const result = await signup(formData);
 
     if (!result.success) {
-      toast.error(result.message);
-      return;
+      alert(result.message);
     }
-
-    toast.success("Registracija uspješna");
-    navigate("/");
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-base-100 px-4">
-      <div className="card w-full max-w-md bg-base-200 shadow-xl">
-        <div className="card-body">
-          <h1 className="text-center text-3xl font-bold text-primary">
-            Sign Up
-          </h1>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: theme.panelBg,
+        color: theme.text,
+        padding: "20px",
+      }}
+    >
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          width: "400px",
+          padding: "30px",
+          borderRadius: "22px",
+          background: theme.panelSoft,
+          border: `1px solid ${theme.border}`,
+          display: "flex",
+          flexDirection: "column",
+          gap: "14px",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+        }}
+      >
+        <h2
+          style={{
+            margin: 0,
+            textAlign: "center",
+            color: theme.text,
+            fontSize: "30px",
+            fontWeight: "800",
+          }}
+        >
+          Sign Up
+        </h2>
 
-          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <label className="label">
-                <span className="label-text">Full Name</span>
-              </label>
-              <input
-                type="text"
-                className="input input-bordered w-full"
-                value={formData.full_name}
-                onChange={(e) =>
-                  setFormData({ ...formData, full_name: e.target.value })
-                }
-                placeholder="Unesi ime i prezime"
-              />
-            </div>
+        <p
+          style={{
+            margin: "0 0 10px 0",
+            textAlign: "center",
+            color: theme.subtext,
+            fontSize: "14px",
+          }}
+        >
+          Napravi svoj Chatty račun
+        </p>
 
-            <div>
-              <label className="label">
-                <span className="label-text">Email</span>
-              </label>
-              <input
-                type="email"
-                className="input input-bordered w-full"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                placeholder="Unesi email"
-              />
-            </div>
+        <input
+          type="text"
+          placeholder="Full name"
+          value={formData.full_name}
+          onChange={(e) =>
+            setFormData({ ...formData, full_name: e.target.value })
+          }
+          style={{
+            padding: "14px",
+            borderRadius: "14px",
+            border: `1px solid ${theme.border}`,
+            background: theme.inputBg,
+            color: "#fff",
+            outline: "none",
+            fontSize: "15px",
+          }}
+        />
 
-            <div>
-              <label className="label">
-                <span className="label-text">Password</span>
-              </label>
-              <input
-                type="password"
-                className="input input-bordered w-full"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                placeholder="Unesi password"
-              />
-            </div>
+        <input
+          type="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={(e) =>
+            setFormData({ ...formData, email: e.target.value })
+          }
+          style={{
+            padding: "14px",
+            borderRadius: "14px",
+            border: `1px solid ${theme.border}`,
+            background: theme.inputBg,
+            color: "#fff",
+            outline: "none",
+            fontSize: "15px",
+          }}
+        />
 
-            <button
-              type="submit"
-              className="btn btn-primary w-full"
-              disabled={isSigningUp}
-            >
-              {isSigningUp ? "Registracija..." : "Sign Up"}
-            </button>
-          </form>
+        <input
+          type="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={(e) =>
+            setFormData({ ...formData, password: e.target.value })
+          }
+          style={{
+            padding: "14px",
+            borderRadius: "14px",
+            border: `1px solid ${theme.border}`,
+            background: theme.inputBg,
+            color: "#fff",
+            outline: "none",
+            fontSize: "15px",
+          }}
+        />
 
-          <p className="mt-4 text-center text-sm">
-            Već imaš račun?{" "}
-            <Link to="/login" className="link link-primary">
-              Prijavi se
-            </Link>
-          </p>
-        </div>
-      </div>
+        <button
+          type="submit"
+          disabled={isSigningUp}
+          style={{
+            padding: "14px",
+            borderRadius: "14px",
+            border: "none",
+            background: theme.accent,
+            color: "#fff",
+            fontWeight: "800",
+            fontSize: "15px",
+            cursor: "pointer",
+          }}
+        >
+          {isSigningUp ? "Registracija..." : "Sign Up"}
+        </button>
+
+        <p
+          style={{
+            textAlign: "center",
+            margin: "6px 0 0 0",
+            color: theme.subtext,
+          }}
+        >
+          Već imaš račun?{" "}
+          <button
+            type="button"
+            onClick={goToLogin}
+            style={{
+              background: "none",
+              border: "none",
+              color: theme.accentStrong,
+              cursor: "pointer",
+              fontWeight: "800",
+              fontSize: "14px",
+            }}
+          >
+            Prijavi se
+          </button>
+        </p>
+      </form>
     </div>
   );
 };

@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
-import { useChatStore } from "../store/useChatStore";
-import { useAuthStore } from "../store/useAuthStore";
 import Sidebar from "../components/Sidebar";
 import ChatContainer from "../components/ChatContainer";
 import ProfileModal from "../components/ProfileModal";
+import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "../store/useAuthStore";
+import { useThemeStore } from "../store/useThemeStore";
 
 const BACKEND_URL = "http://localhost:5001";
 
 const HomePage = () => {
   const { selectedUser, getUsers } = useChatStore();
-  const { logout, authUser } = useAuthStore();
-  const [showProfileModal, setShowProfileModal] = useState(false);
+  const { authUser, logout } = useAuthStore();
+  const { themes, currentThemeKey } = useThemeStore();
+
+  const theme = themes[currentThemeKey];
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     getUsers();
@@ -19,25 +23,23 @@ const HomePage = () => {
   return (
     <div
       style={{
-        minHeight: "100vh",
-        background:
-          "linear-gradient(180deg, #170804 0%, #1a0904 35%, #120603 100%)",
-        color: "#f7d7b8",
-        padding: "18px",
+        height: "100vh",
+        display: "flex",
+        background: theme.pageBg,
+        color: theme.text,
+        padding: "8px",
         boxSizing: "border-box",
       }}
     >
       <div
         style={{
-          maxWidth: "1450px",
-          margin: "0 auto",
-          height: "calc(100vh - 36px)",
-          border: "1px solid rgba(196, 133, 82, 0.35)",
-          borderRadius: "22px",
-          overflow: "hidden",
-          background: "rgba(20, 7, 3, 0.96)",
-          boxShadow: "0 10px 40px rgba(0,0,0,0.35)",
+          width: "100%",
+          height: "100%",
           display: "flex",
+          overflow: "hidden",
+          borderRadius: "24px",
+          border: `1px solid ${theme.borderSoft}`,
+          background: theme.pageBg,
         }}
       >
         <Sidebar />
@@ -52,21 +54,21 @@ const HomePage = () => {
         >
           <div
             style={{
-              height: "76px",
-              borderBottom: "1px solid rgba(196, 133, 82, 0.28)",
+              height: "84px",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: "0 22px",
-              background: "rgba(32, 12, 6, 0.7)",
+              padding: "0 24px",
+              borderBottom: `1px solid ${theme.borderSoft}`,
+              background: theme.panelSoft,
+              boxSizing: "border-box",
             }}
           >
             <div
               style={{
-                fontSize: "24px",
+                fontSize: "22px",
                 fontWeight: "800",
-                letterSpacing: "0.2px",
-                color: "#f8dfc7",
+                color: theme.text,
               }}
             >
               Chatty
@@ -76,19 +78,20 @@ const HomePage = () => {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "12px",
+                gap: "14px",
               }}
             >
               <button
-                onClick={() => setShowProfileModal(true)}
+                onClick={() => setShowProfile(true)}
                 style={{
-                  border: "1px solid rgba(196, 133, 82, 0.35)",
-                  background: "rgba(39, 13, 6, 0.9)",
-                  color: "#fff",
-                  borderRadius: "14px",
-                  padding: "10px 16px",
+                  border: `1px solid ${theme.border}`,
+                  background: "transparent",
+                  color: theme.text,
+                  borderRadius: "16px",
+                  padding: "12px 18px",
                   cursor: "pointer",
                   fontWeight: "700",
+                  fontSize: "16px",
                 }}
               >
                 Profile
@@ -104,27 +107,28 @@ const HomePage = () => {
                 {authUser?.profile_pic ? (
                   <img
                     src={`${BACKEND_URL}${authUser.profile_pic}`}
-                    alt="me"
+                    alt={authUser.full_name}
                     style={{
-                      width: "40px",
-                      height: "40px",
+                      width: "44px",
+                      height: "44px",
                       borderRadius: "50%",
                       objectFit: "cover",
-                      border: "2px solid #b57a4d",
+                      border: `2px solid ${theme.accent}`,
                     }}
                   />
                 ) : (
                   <div
                     style={{
-                      width: "40px",
-                      height: "40px",
+                      width: "44px",
+                      height: "44px",
                       borderRadius: "50%",
-                      background: "#b57a4d",
+                      background: theme.accent,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       color: "#fff",
                       fontWeight: "800",
+                      fontSize: "18px",
                       textTransform: "uppercase",
                     }}
                   >
@@ -134,9 +138,9 @@ const HomePage = () => {
 
                 <div
                   style={{
-                    color: "#f3cfab",
-                    fontWeight: "600",
-                    fontSize: "15px",
+                    color: theme.text,
+                    fontWeight: "700",
+                    fontSize: "16px",
                   }}
                 >
                   {authUser?.full_name}
@@ -147,13 +151,13 @@ const HomePage = () => {
                 onClick={logout}
                 style={{
                   border: "none",
-                  background: "#b57a4d",
+                  background: theme.accent,
                   color: "#fff",
-                  fontWeight: "700",
-                  borderRadius: "14px",
+                  borderRadius: "16px",
                   padding: "12px 18px",
                   cursor: "pointer",
-                  fontSize: "15px",
+                  fontWeight: "800",
+                  fontSize: "16px",
                 }}
               >
                 Logout
@@ -175,58 +179,58 @@ const HomePage = () => {
                 style={{
                   flex: 1,
                   display: "flex",
-                  flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#efcba8",
-                  gap: "10px",
+                  background: theme.panelBg,
+                  padding: "24px",
                 }}
               >
-                <div
-                  style={{
-                    width: "86px",
-                    height: "86px",
-                    borderRadius: "50%",
-                    background: "rgba(181, 122, 77, 0.16)",
-                    border: "1px solid rgba(196, 133, 82, 0.3)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "34px",
-                  }}
-                >
-                  💬
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      width: "88px",
+                      height: "88px",
+                      margin: "0 auto 22px auto",
+                      borderRadius: "50%",
+                      background: theme.panelSoft,
+                      border: `1px solid ${theme.border}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "40px",
+                    }}
+                  >
+                    💬
+                  </div>
+
+                  <h1
+                    style={{
+                      fontSize: "32px",
+                      margin: "0 0 12px 0",
+                      fontWeight: "800",
+                      color: theme.text,
+                    }}
+                  >
+                    Welcome to Chatty
+                  </h1>
+
+                  <p
+                    style={{
+                      margin: 0,
+                      color: theme.subtext,
+                      fontSize: "16px",
+                    }}
+                  >
+                    Odaberi korisnika iz sidebara i započni razgovor.
+                  </p>
                 </div>
-
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: "34px",
-                    fontWeight: "800",
-                    color: "#f7dbbf",
-                  }}
-                >
-                  Welcome to Chatty
-                </h2>
-
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "17px",
-                    color: "#d7ad88",
-                  }}
-                >
-                  Odaberi korisnika iz sidebara i započni razgovor.
-                </p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {showProfileModal && (
-        <ProfileModal onClose={() => setShowProfileModal(false)} />
-      )}
+      {showProfile && <ProfileModal onClose={() => setShowProfile(false)} />}
     </div>
   );
 };

@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "./store/useAuthStore";
+import { useThemeStore } from "./store/useThemeStore";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import HomePage from "./pages/HomePage";
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+  const { themes, currentThemeKey } = useThemeStore();
   const [isLoginMode, setIsLoginMode] = useState(true);
+
+  const theme = themes[currentThemeKey];
 
   useEffect(() => {
     checkAuth();
@@ -20,8 +24,8 @@ function App() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#140904",
-          color: "#f5d2b3",
+          background: theme.panelBg,
+          color: theme.text,
           fontSize: "24px",
           fontWeight: "bold",
         }}
