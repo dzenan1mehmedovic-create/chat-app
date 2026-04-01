@@ -1,33 +1,26 @@
-import { useAuthStore } from "../store/useAuthStore.js";
+import { useEffect } from "react";
+import { useChatStore } from "../store/useChatStore";
+import Sidebar from "../components/Sidebar";
+import ChatContainer from "../components/ChatContainer";
 
 const HomePage = () => {
-  const { authUser, logout } = useAuthStore();
+  const { selectedUser, getUsers } = useChatStore();
+
+  useEffect(() => {
+    getUsers();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-base-100 text-base-content">
-      <div className="navbar border-b border-base-300 bg-base-200 px-6">
-        <div className="flex-1">
-          <a className="text-2xl font-bold text-primary">Chatty</a>
-        </div>
+    <div style={{ display: "flex", height: "100vh" }}>
+      <Sidebar />
 
-        <div className="flex items-center gap-3">
-          <span className="font-medium">{authUser?.full_name}</span>
-          <button className="btn btn-primary btn-sm" onClick={logout}>
-            Logout
-          </button>
+      {selectedUser ? (
+        <ChatContainer />
+      ) : (
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <h2>Odaberi korisnika za chat</h2>
         </div>
-      </div>
-
-      <div className="flex h-[calc(100vh-65px)] items-center justify-center">
-        <div className="text-center">
-          <h1 className="mb-2 text-4xl font-bold text-primary">
-            Welcome to Chatty
-          </h1>
-          <p className="text-base-content/70">
-            Auth radi i spremni smo za dalje.
-          </p>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
