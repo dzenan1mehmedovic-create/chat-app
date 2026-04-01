@@ -41,9 +41,19 @@ export const useChatStore = create((set, get) => ({
     const { selectedUser, messages } = get();
 
     try {
+      const formData = new FormData();
+
+      if (messageData.text) {
+        formData.append("text", messageData.text);
+      }
+
+      if (messageData.image) {
+        formData.append("image", messageData.image);
+      }
+
       const res = await axiosInstance.post(
         `/messages/send/${selectedUser.id}`,
-        messageData,
+        formData,
       );
 
       set({ messages: [...messages, res.data] });
@@ -57,6 +67,7 @@ export const useChatStore = create((set, get) => ({
       selectedUser,
       typingUserId: null,
       typingUserName: "",
+      messages: [],
     }),
 
   subscribeToMessages: () => {

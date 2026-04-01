@@ -5,7 +5,10 @@ import { useAuthStore } from "../store/useAuthStore";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
+  const [image, setImage] = useState(null);
+  const [imageName, setImageName] = useState("");
   const typingTimeoutRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const { sendMessage, selectedUser } = useChatStore();
   const { socket } = useSocketStore();
@@ -42,11 +45,27 @@ const MessageInput = () => {
     }
   };
 
-  const handleSend = async () => {
-    if (!text.trim()) return;
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
 
-    await sendMessage({ text });
+    if (!file) return;
+
+    setImage(file);
+    setImageName(file.name);
+  };
+
+  const handleSend = async () => {
+    if (!text.trim() && !image) return;
+
+    await sendMessage({ text, image });
+
     setText("");
+    setImage(null);
+    setImageName("");
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
 
     clearTimeout(typingTimeoutRef.current);
     emitStopTyping();
@@ -67,6 +86,18 @@ const MessageInput = () => {
         background: "rgba(25, 9, 4, 0.82)",
       }}
     >
+      {imageName && (
+        <div
+          style={{
+            marginBottom: "10px",
+            color: "#ddb38e",
+            fontSize: "13px",
+          }}
+        >
+          Odabrana slika: {imageName}
+        </div>
+      )}
+
       <div
         style={{
           display: "flex",
@@ -74,6 +105,31 @@ const MessageInput = () => {
           gap: "12px",
         }}
       >
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          onChange={handleImageChange}
+          style={{ display: "none" }}
+        />
+
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          style={{
+            height: "56px",
+            padding: "0 18px",
+            borderRadius: "16px",
+            border: "1px solid rgba(196, 133, 82, 0.35)",
+            background: "rgba(39, 13, 6, 0.9)",
+            color: "#fff",
+            fontWeight: "700",
+            fontSize: "18px",
+            cursor: "pointer",
+          }}
+        >
+          📷
+        </button>
+
         <input
           type="text"
           value={text}

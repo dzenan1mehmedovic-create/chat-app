@@ -4,6 +4,8 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useSocketStore } from "../store/useSocketStore";
 import MessageInput from "./MessageInput";
 
+const BACKEND_URL = "http://localhost:5001";
+
 const formatMessageTime = (dateString) => {
   if (!dateString) return "";
 
@@ -39,7 +41,7 @@ const ChatContainer = () => {
     subscribeToMessages();
 
     return () => unsubscribeFromMessages();
-  }, [selectedUser, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+  }, [selectedUser]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -182,15 +184,31 @@ const ChatContainer = () => {
                   wordBreak: "break-word",
                 }}
               >
-                <div
-                  style={{
-                    fontSize: "17px",
-                    lineHeight: "1.4",
-                    marginBottom: "6px",
-                  }}
-                >
-                  {msg.text}
-                </div>
+                {msg.image && (
+                  <img
+                    src={`${BACKEND_URL}${msg.image}`}
+                    alt="chat"
+                    style={{
+                      width: "100%",
+                      maxWidth: "260px",
+                      borderRadius: "12px",
+                      marginBottom: msg.text ? "10px" : "6px",
+                      display: "block",
+                    }}
+                  />
+                )}
+
+                {msg.text && (
+                  <div
+                    style={{
+                      fontSize: "17px",
+                      lineHeight: "1.4",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {msg.text}
+                  </div>
+                )}
 
                 <div
                   style={{

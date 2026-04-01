@@ -45,16 +45,22 @@ export const sendMessage = async (req, res) => {
   try {
     const senderId = req.userId;
     const { id: receiverId } = req.params;
-    const { text, image = "" } = req.body;
+    const text = req.body.text || "";
 
-    if ((!text || text.trim() === "") && !image) {
+    let image = "";
+
+    if (req.file) {
+      image = `/uploads/messages/${req.file.filename}`;
+    }
+
+    if (!text.trim() && !image) {
       return res.status(400).json({ message: "Poruka ili slika su obavezni" });
     }
 
     const [result] = await db.query(
       `INSERT INTO messages (sender_id, receiver_id, text, image)
        VALUES (?, ?, ?, ?)`,
-      [senderId, receiverId, text || "", image || ""],
+      [senderId, receiverId, text, image],
     );
 
     const [newMessageRows] = await db.query(
