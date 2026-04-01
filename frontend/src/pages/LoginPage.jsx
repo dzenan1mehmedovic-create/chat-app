@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 
-const SignUpPage = ({ goToLogin }) => {
-  const { signup, isSigningUp } = useAuthStore();
+const LoginPage = ({ goToSignup }) => {
+  const { login, isLoggingIn } = useAuthStore();
 
   const [formData, setFormData] = useState({
-    full_name: "",
     email: "",
     password: "",
   });
@@ -13,7 +12,7 @@ const SignUpPage = ({ goToLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const result = await signup(formData);
+    const result = await login(formData);
 
     if (!result.success) {
       alert(result.message);
@@ -44,24 +43,7 @@ const SignUpPage = ({ goToLogin }) => {
           gap: "14px",
         }}
       >
-        <h2 style={{ margin: 0, textAlign: "center" }}>Registracija</h2>
-
-        <input
-          type="text"
-          placeholder="Puno ime"
-          value={formData.full_name}
-          onChange={(e) =>
-            setFormData({ ...formData, full_name: e.target.value })
-          }
-          style={{
-            padding: "12px",
-            borderRadius: "10px",
-            border: "1px solid #8b5e3c",
-            backgroundColor: "#140904",
-            color: "#fff",
-            outline: "none",
-          }}
-        />
+        <h2 style={{ margin: 0, textAlign: "center" }}>Login</h2>
 
         <input
           type="email"
@@ -99,7 +81,7 @@ const SignUpPage = ({ goToLogin }) => {
 
         <button
           type="submit"
-          disabled={isSigningUp}
+          disabled={isLoggingIn}
           style={{
             padding: "12px",
             borderRadius: "10px",
@@ -110,14 +92,14 @@ const SignUpPage = ({ goToLogin }) => {
             cursor: "pointer",
           }}
         >
-          {isSigningUp ? "Registracija..." : "Sign Up"}
+          {isLoggingIn ? "Prijava..." : "Login"}
         </button>
 
         <p style={{ textAlign: "center", margin: 0 }}>
-          Već imaš račun?{" "}
+          Nemaš račun?{" "}
           <button
             type="button"
-            onClick={goToLogin}
+            onClick={goToSignup}
             style={{
               background: "none",
               border: "none",
@@ -126,7 +108,7 @@ const SignUpPage = ({ goToLogin }) => {
               fontWeight: "bold",
             }}
           >
-            Login
+            Registruj se
           </button>
         </p>
       </form>
@@ -134,4 +116,4 @@ const SignUpPage = ({ goToLogin }) => {
   );
 };
 
-export default SignUpPage;
+export default LoginPage;

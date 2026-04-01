@@ -26,7 +26,7 @@ export const getMessages = async (req, res) => {
     const { id: userToChatId } = req.params;
 
     const [messages] = await db.query(
-      `SELECT id, sender_id, receiver_id, text, image, created_at
+      `SELECT id, sender_id, receiver_id, text, image, seen, created_at
        FROM messages
        WHERE (sender_id = ? AND receiver_id = ?)
           OR (sender_id = ? AND receiver_id = ?)
@@ -58,13 +58,13 @@ export const sendMessage = async (req, res) => {
     }
 
     const [result] = await db.query(
-      `INSERT INTO messages (sender_id, receiver_id, text, image)
-       VALUES (?, ?, ?, ?)`,
-      [senderId, receiverId, text, image],
+      `INSERT INTO messages (sender_id, receiver_id, text, image, seen)
+       VALUES (?, ?, ?, ?, ?)`,
+      [senderId, receiverId, text, image, 0],
     );
 
     const [newMessageRows] = await db.query(
-      `SELECT id, sender_id, receiver_id, text, image, created_at
+      `SELECT id, sender_id, receiver_id, text, image, seen, created_at
        FROM messages
        WHERE id = ?`,
       [result.insertId],
@@ -81,6 +81,33 @@ export const sendMessage = async (req, res) => {
     res.status(201).json(newMessage);
   } catch (error) {
     console.log("Greška u sendMessage:", error.message);
+    res.status(500).json({ message: "Greška na serveru" });
+  }
+};
+
+export const markMessagesAsSeen = async (req, res) => {
+  try {
+    const myId = req.userId;
+    const { id: senderId } = req.params;
+
+    await db.query(
+      `UPDATE messages
+       SET seen = 1
+       WHERE sender_id = ? AND receiver_id = ? AND seen = 0`,
+      [senderId, myId],
+    );
+
+    const senderSocketId = getReceiverSocketId(String(senderId));
+
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("messagesSeen", {
+        seenBy: myId,
+      });
+    }
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.log("Greška u markMessagesAsSeen:", error.message);
     res.status(500).json({ message: "Greška na serveru" });
   }
 };

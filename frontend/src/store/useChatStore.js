@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios.js";
 import { useSocketStore } from "./useSocketStore.js";
+import { useAuthStore } from "./useAuthStore.js";
 
 export const useChatStore = create((set, get) => ({
   users: [],
@@ -34,6 +35,20 @@ export const useChatStore = create((set, get) => ({
       console.log(error);
     } finally {
       set({ isMessagesLoading: false });
+    }
+  },
+
+  markMessagesAsSeen: async (userId) => {
+    try {
+      await axiosInstance.put(`/messages/seen/${userId}`);
+
+      set({
+        messages: get().messages.map((msg) =>
+          Number(msg.sender_id) === Number(userId) ? { ...msg, seen: 1 } : msg,
+        ),
+      });
+    } catch (error) {
+      console.log(error);
     }
   },
 
@@ -77,9 +92,12 @@ export const useChatStore = create((set, get) => ({
     const socket = useSocketStore.getState().socket;
     if (!socket) return;
 
+    const authUser = useAuthStore.getState().authUser;
+
     socket.off("newMessage");
     socket.off("showTyping");
     socket.off("hideTyping");
+    socket.off("messagesSeen");
 
     socket.on("newMessage", (newMessage) => {
       if (Number(newMessage.sender_id) !== Number(selectedUser.id)) return;
@@ -108,6 +126,16 @@ export const useChatStore = create((set, get) => ({
         typingUserName: "",
       });
     });
+
+    socket.on("messagesSeen", () => {
+      set({
+        messages: get().messages.map((msg) =>
+          Number(msg.sender_id) === Number(authUser?.id)
+            ? { ...msg, seen: 1 }
+            : msg,
+        ),
+      });
+    });
   },
 
   unsubscribeFromMessages: () => {
@@ -116,6 +144,7 @@ export const useChatStore = create((set, get) => ({
       socket.off("newMessage");
       socket.off("showTyping");
       socket.off("hideTyping");
+      socket.off("messagesSeen");
     }
   },
 }));

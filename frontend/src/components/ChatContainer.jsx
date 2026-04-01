@@ -26,6 +26,7 @@ const ChatContainer = () => {
     unsubscribeFromMessages,
     typingUserId,
     typingUserName,
+    markMessagesAsSeen,
   } = useChatStore();
 
   const { authUser } = useAuthStore();
@@ -37,8 +38,13 @@ const ChatContainer = () => {
   useEffect(() => {
     if (!selectedUser) return;
 
-    getMessages(selectedUser.id);
-    subscribeToMessages();
+    const loadChat = async () => {
+      await getMessages(selectedUser.id);
+      await markMessagesAsSeen(selectedUser.id);
+      subscribeToMessages();
+    };
+
+    loadChat();
 
     return () => unsubscribeFromMessages();
   }, [selectedUser]);
@@ -226,12 +232,21 @@ const ChatContainer = () => {
 
                 <div
                   style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "10px",
                     fontSize: "11px",
-                    opacity: 0.78,
-                    textAlign: "right",
+                    opacity: 0.85,
                   }}
                 >
-                  {formatMessageTime(msg.created_at)}
+                  <span>{formatMessageTime(msg.created_at)}</span>
+
+                  {isMe && (
+                    <span>
+                      {msg.seen ? "✓✓ Seen" : "✓ Sent"}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
